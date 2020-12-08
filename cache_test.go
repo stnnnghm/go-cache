@@ -2,6 +2,7 @@ package cache
 
 import (
 	"testing"
+	"time"
 )
 
 func TestBasic(t *testing.T) {
@@ -48,4 +49,25 @@ func TestRemove(t *testing.T) {
 	if applePrice != nil {
 		t.Error("Apple price is not nil after removal")
 	}
+}
+
+func TestThreading(t *testing.T) {
+	bloom := New()
+	bloom.Set("Granniwinkle", 4.8)
+
+	go func() {
+		for {
+			_, _ = bloom.Get("Granniwinkle")
+		}
+	}()
+
+	time.Sleep(1 * time.Second)
+
+	go func() {
+		for {
+			bloom.Set("Maude", 4.6)
+		}
+	}()
+
+	time.Sleep(5 * time.Second)
 }
